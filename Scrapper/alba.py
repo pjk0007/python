@@ -16,7 +16,7 @@ def get_pages():
 def extract_job(job):
     title = job.find("a")["title"]
     company = job.find("dt").contents[0]
-    location = job.find("dd", {"class": "local"})
+    location = job.find("dd", {"class": "local"}).text
     link = job.find("a")["href"]
 
     return {'title': title,
