@@ -1,14 +1,16 @@
 import requests
 from bs4 import BeautifulSoup as bs
 
-INDEED_URL = "https://kr.indeed.com/취업?q=python&limit=50"
 
-
-def get_pages():
-    result = requests.get(f"{INDEED_URL}&start=9999999")
+def get_pages(url):
+    result = requests.get(f"{url}&start=9999999")
     soup = bs(result.text, "html.parser")
     pagination = soup.find("ul", {"class": "pagination-list"})
-    last_page = int(pagination.find('b').text)
+
+    if pagination:
+        last_page = int(pagination.find('b').text)
+    else:
+        last_page = 1
 
     return last_page
 
@@ -40,11 +42,11 @@ def extract_job(job):
             'link': f'https://kr.indeed.com/취업?jk={job_id}'}
 
 
-def extract_jobs(last_page):
+def extract_jobs(url, last_page):
     jobs = []
     for page in range(last_page):
         print(f"indeed : Scrapping page {page + 1}")
-        result = requests.get(f"{INDEED_URL}&start={page*50}")
+        result = requests.get(f"{url}&start={page*50}")
         soup = bs(result.text, "html.parser")
         results = soup.find_all("a", {"class": "tapItem"})
 
@@ -55,9 +57,10 @@ def extract_jobs(last_page):
     return jobs
 
 
-def get_jobs():
-    last_page = get_pages()
+def get_jobs(word):
+    url = f"https://kr.indeed.com/취업?q={word}&limit=50"
+    last_page = get_pages(url)
 
-    jobs = extract_jobs(last_page)
+    jobs = extract_jobs(url, last_page)
 
     return jobs

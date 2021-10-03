@@ -1,11 +1,9 @@
 import requests
 from bs4 import BeautifulSoup as bs
 
-INDEED_URL = "https://www.albamon.com/search/Recruit?Keyword=개발자&PageSize=29"
 
-
-def get_pages():
-    result = requests.get(f"{INDEED_URL}")
+def get_pages(url):
+    result = requests.get(f"{url}")
     soup = bs(result.text, "html.parser")
     total_span = soup.find("span", {"class": "total"})
     total = int(total_span.find("em").text.replace(',', ''))
@@ -25,11 +23,11 @@ def extract_job(job):
             'link': f'{link}'}
 
 
-def extract_jobs(last_page):
+def extract_jobs(url, last_page):
     jobs = []
     for page in range(1, last_page + 1):
         print(f"alba : Scrapping page {page}")
-        result = requests.get(f"{INDEED_URL}&Page={page}")
+        result = requests.get(f"{url}&Page={page}")
         soup = bs(result.text, "html.parser")
         results = soup.find_all("div", {"class": "booth"})
 
@@ -40,8 +38,9 @@ def extract_jobs(last_page):
     return jobs
 
 
-def get_jobs():
-    last_page = get_pages()
+def get_jobs(word):
+    url = f"https://www.albamon.com/search/Recruit?Keyword={word}&PageSize=29"
+    last_page = get_pages(url)
 
-    jobs = extract_jobs(last_page)
+    jobs = extract_jobs(url, last_page)
     return jobs
